@@ -1,0 +1,212 @@
+Manual
+
+    Main purpose of mGeo Exporter is to export data from Maya into Houdini. It supports Polygons, NURBS, Curves and Particles. Additionally, you can transfer any DAG object as Point data with Attributes. Any Attribute can be read from and written to the Object as Point Attributes . Enabling you to move large amount of data between the programs. This is a huge time saver in iterative workflow situations. Examples can be seen in the video tutorials.
+    When storing the geometry you can create Primitive and Point Groups based on various criteria, such as assigned material or Object name. The script writes data in a format Houdini can read JSON GEO. It is also possible to automatically convert files to BGEO format. (requires Houdini installed).
+1. Interface Groups and Options
+
+1.1 Formats Group
+File format:
+    Select the format to store the files in . Two types , GEO and BGEO. It is also possible to use the GZIP archive . Houdini reads these natively (use fileSOP). To be able to store in BGEO you must have Houdini installed, since utility gconvert is installed with Houdini.
+Cache:
+    Select the format for storing animation data. There are two options: first one is exporting each frame as a separate file (sequence). Second option lets you write one file for the geometry and another file (point cache) for animation in MDD format. MDD can be read in Houdini easily with (MDD SOP)
+Write geometry checkbox
+    This option lets you decide whether to include geometry when exporting. When unchecked it will write out only point cache MDD without geometry.
+
+1.2 Frame Range Group
+    Single
+        The scene data will be stored in a file in the current state of current frame
+    Range
+        Range options lets you record the animation frames in the specified range. When exporting animation to Sequence, default padding is $F5. You can also set the padding value by adding $FN to the end of your file name, where N is the number of padding to be added your output sequence
+    << 
+        Set the frame range from the current (in/out) range on the Timeline
+
+1.3 Output file Group
+    Input field is where you specify your output folder. File extension(s) will be added automatically according to the format you have chosen. Name of your file will be printed in output window after it has been stored successfully. This is where you set $FN, where N is the size of padding to the frame number (like in Houdini). Eg "c:/export/file_$F4"
+
+    Options when output file already exists:
+    Ask
+        You are prompted to change the file name
+    Overwrite
+        Files are automatically overwritten. The default
+    Skip
+        Skips. Does not store file.
+    Rename
+        Automatically renames the file , adding a number to the filename or increasing the available figures . Eg. name_ # #. Ext
+
+1.4 Export Sets Group
+    Create new export set from selection
+        Creates a new set of export selected objects.
+    Remove set
+        Deletes the selected set. You can also delete the corresponding node in outliner
+    Add selected objects to Set
+        Adds selected items to the selected Set. You can also drag the desired node in to the set using outliner
+    Remove selected objects from Set
+        Removes the selected objects from the selected Sets
+    Replace all objects in Set with selected
+        Clears the selected Set and adds the selected Objects
+    Clear Set
+        Clears the selected set(s)
+
+1.4.1 Sets window
+    Sets window contains Sets that are present in your scene. Use orange button on the left to activate or deactivate a Set. If the button is gray , the Set will not be exported . To force update the Sets click on the empty area inside of Sets window. Useful when nodes have been removed or added manually from outliner.
+
+1.4.2 Context menu for sets:
+    Copy
+        Copies the settings of current Set to clipboard
+    Paste
+        Pastes the settings to the selected Set from clipboard
+    Rename
+        Opens Rename dialogue box
+    Duplicate
+        Fully duplicates selected sets, including contained objects and settings
+
+1.5 Export Options Group
+    Global Position
+        Toggles reading geometry points coordinates between global and local space
+    Global scale
+        Multiplier size when exporting
+    Visible only
+        With this option enabled only visible objects in the viewport are saved. Object will be excluded from the export if: Visibility attribute is off, if Visibility of the parent object is off, or if it is in display layer, which has its visibility turned off. Intermediate object always skipped
+    Export hierarchy
+        Allows you to export the objects and their children
+
+1.5.1 Polygons Tab Group
+    Poly Group checkbox
+        When enabled it creates a primitive Group for all polygons. This helps separating polygonal geometry from other types. Text input field lets you give a name to the general Polygonal Group and it will be used as prefix for all subsequent groups of polygons.
+    Vertex Attributes
+        List of supported vertex attributes you can include by checking or unchecking
+        UV
+            Uv coordinates. Supports any number of UV sets. Created as Vector3 type attribute. Contextual menu gives you three different naming schemes for UVs.
+            uv, uv1, uv2
+                The first set will be named as "uv" and a number will be added to subsequent sets accordingly. It is understood by Houdini as UV coordinates attribute. This type of naming is supported by a node LayerSOP
+            uv, uv_ <setName>, uv_ <setName>
+                This type of naming names the first uv Set as "uv", so this attribute is considered in Houdini as uv coordinate. Subsequent sets inherit uv set names from Maya, with prefix "uv_"
+            uv_ <setName>, uv_ <setName>, uv_ <setName>
+                All UV sets get the attribute name that matches the Maya Set name with the prefix "uv_"
+        Color
+            Adds Vertex Color attribute "Cd" as Vector3 type Attribute. Supports any number of color sets. Context menu works the same way as in previous option.
+        Vertex Normal
+            Stores vertex normals to transfer Hard \ Soft Edges. Creates Vertex Attribute "N" as Vector3 type Attribute.
+        Edge Crease
+            Stores Crease value on Edges. Vertex Crease is not supported. Creates a vertex attribute "creaseweight" of type float
+    Prim attributes
+        Input field for custom Primitive Attributes you want to export
+    Groups
+        Options for creating Groups based on criterias set by checkboxes and user input prefix
+    The field consists of three columns
+        - Prim group by:
+            Enables or disables the generation of a particular type of Group
+        - Prefix:
+            Text from this input field will be used as a prefix for the Group name
+        - Filter:
+            In this input field , you can write a name or partial name of the Object(s) to be included. Objects that fall outside of the filtered selection will be pit the general Group for current type derived from Poly Group (like noParent or otherObjects etc)
+    Types of groups :
+        - Material
+            Each polygon falls into a Group named after the material assigned to it
+        - Object Name
+            Each object will fall into a Group named after it. Objects with identical names will fall into the same Group
+        - Shape name
+            For objects that share the same Shape - node . Usually it Instance objects. Can also get a copy of the object at different levels of the hierarchy with the same name
+        - Parent
+            Objects whose parents name matches the name from input field. Objects that are descendants of one single node fall into the same Group. Filter in this case is looking for the name in hierarchy all the way to the top, until it finds a match . If no match is found , the subject is not included in the Group but will be put in the general Group named “noParent”
+        - Display Layer
+            Groups are generated based on the composition of Display Layers. All objects in a particular Display Layer will be put in a Group named after the Display Layer
+
+1.5.2 Curves Tab Group
+Supports any NURBS curves . In Houdini they are NURBS or Polygonal primitives
+    Curves Group
+        This option includes the creation of a Primitive Group , common to all the curves. Name from the input field will be used as a general Prim Group name for all Curves, as well as the prefix for all Groups of this type
+    NURBS \ Polyline
+        Gives you the option to saving the Curves as NURBS or as Polygonal primitives
+    Group by:
+        Object Name
+            For each curve will be created a separate Group
+        Parent
+            Objects whose parents name matches the name from input field will be put in this Group. Objects that are descendants of one single node fall into the same Group.
+        Display Layer
+            Groups are generated based on the composition of Display Layers. All objects in a particular Display Layer will be put in a Group named after the Display Layer
+
+1.5.3 Particles Tab Group
+    Particles Group:
+        This checkbox enables creation of a common Point- Group for the Particles. The text from the input field becomes the name of the Point Group for all Points, as well as the prefix for all Groups of Particles
+    Particle Attributes
+        Input field for the name of the Attribute(s) you want to export. Read more about syntactic rules in section 1.9
+    Groups
+        Object name
+            The Group includes all the Points belonging to specific particle system
+        Emitter
+            Groups are created according to the number of emitters , and in each Group Points are added, particle system whith attachment to a particular emitter ( not to be confused with the term " emitted from a particular emitter " )
+
+1.5.4 Pivots Tab Group
+    Pivot Groups
+        Option to enable the generation of Point- Group for Pivot points . Text from the input field will be used as the Point-Group name for all Points and prefix for all Groups of type Pivot.
+    Object filter
+        In the input field write name or part of the name of the Object(s) that should be considered as a Pivot . If the Object satisfies filtering criteria, it will be in if not it will be ignored .
+    Skip transform without shape
+        When checked your export will not include shapeless transform nodes even if there are other Objects inside of it
+    Object Attributes    
+        Orient
+            Rotation Attributes are stored as "orient" in Vector4 format. This attribute is automatically applied in Houdini inside CopySOP node for instancing.
+        Scale
+            The scale attribute is automatically stored as "scale" in Vector3 format . This Attribute is used in Houdini when copying onto geometries points using CopySOP and when instancing.
+    Input field for any custom Attributes you want to export. Attributes will be recorded as point attributes.
+    Groups
+        Object name
+            Creates Group for each Point that satisfies filtering criteria based on Objects name.
+        Shape name
+            Creates Group For each Point that satisfies filtering criteria based on Objects Shape nodes name.
+        Parent
+            Creates Group For each Point that satisfies filtering criteria based on its Parent nodes name.
+        Display Layer
+            Creates Group based on Display Layer membership.
+
+1.6 Main Menu window.
+    Menu
+        Main Menu window
+    Save settings ...
+        Saves settings for selected Set to disk.
+    Load settings ...
+        Loads settings from a file and applies to selected Sets
+    Default
+        Applies default settings to selected Sets
+    Save as default
+        Saves settings from selected Set as the Default settings .
+        WARNING!!! New Sets will be created with the saved settings
+    Extended report
+        Extensive reporting in the output. Can slow performance
+    Isolate exported
+        During export isolates Set content from rest of the scene data (skin clusters, dynamics etc.) to free up resources and speed up the process. Useful for dense scenes with large amount of data, when you only want to pull out small part without having to calculate dynamics skin etc..
+    Color indicators
+        Enables the display of color indicators for Sets settings. More on this under section 1.8
+    Show warnings
+        Enables the display of warning messages regarding file paths etc.
+    Help
+        Help Menu
+    Help
+        Link to theweb page of the script
+    About
+        About window
+
+1.7 buttons
+    Export
+        Button that starts the Export process
+    Long (thin) button under the window output
+        Clears the output
+    Esc key
+        Cancels the export process
+        
+1.8 Color indicators
+If you have multiple Sets , color indicators will alow you to see their settings. The indicator consists of 8 tokens in 2 rows . Each of these means enabled or disabled for certain option .
+    | 1 | 2 | 3 | 4 |
+    | 5 | 6 | 7 | 8 |
+1 - Export animation or one frame (on = range, off = single frame)
+2 - File type (on = BGEO, off = GEO)
+3 - Type of animation (on = MDD, off = sequence)
+4 - Use zip archive (on = zip enable, off = zip disable)
+5 - Export polygons (on \ off)
+6 - Export curves (on \ off)
+7 - Export particles (on \ off)
+8 - Export pivot (on \ off)
+
+1.9. Rules for writing the Attributes you want to export:
+Polygons, Particles and Pivots have input fields for entering Attribute names for exporting. In this field you should enter the correct Attribute names separated by SPACE. If the Attribute is not found on any node , it will not be created. If the attribute is found on some nodes , it will be created with default value - 0 ( for scale is 1). If you want a different default value , you must write it in parentheses immediately after the attribute name with no spaces. For a vector or float value is always written by one digit . For string attributes, you must write the text without the quotes .

@@ -1,0 +1,31 @@
+export normals
+export UV
+    http://docs.alembic.io/python/examples.html?highlight=animation#samples
+
+export animation http://alembic.googlecode.com/hg-history/dad0cf82b32d2677b3cfcfb63f022baa67455f6a/python/examples/cask/test/testCask.py
+    https://github.com/alembic/alembic/blob/master/lib/Alembic/AbcCoreAbstract/TimeSamplingType.h#L47-L66
+    https://github.com/alembic/alembic/blob/master/lib/Alembic/AbcCoreAbstract/TimeSampling.h
+multi timevectors ?
+    https://github.com/alembic/alembic/blob/7acd3df4afd1187ef67dc09544fc007937860cfd/lib/Alembic/AbcCoreOgawa/Tests/ArchiveTests.cpp
+    https://github.com/alembic/alembic/blob/7acd3df4afd1187ef67dc09544fc007937860cfd/lib/Alembic/AbcCoreOgawa/Tests/TimeSamplingTests.cpp
+
+export curves
+
+
+https://code.google.com/p/alembic/source/browse/python/examples/cask/test/testCask.py?r=af89c02de53c126021bd781500e69b5ceee68c44
+
+
+
+Custom prop
+---------------
+f = alembic.Abc.OArchive(filename)
+top = f.getTop()
+...
+meshObj = OPolyMesh(xform, 'cube1Shape')
+...
+u = meshObj.getSchema().getUserProperties()
+prop = alembic.Abc.OStringProperty(u, "somename")
+prop.setValue('somevalue')
+------------
+md = archive.getTop().getMetaData()
+md.set('_ai_Description', 'nikitos')

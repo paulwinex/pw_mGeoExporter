@@ -37,8 +37,7 @@ class ColorWordLineEdit(QTextEdit):
     def focusOutEvent(self, event):
         self.editingFinished.emit()
         self.update_tooltip()
-        super(ColorWordLineEdit, self).focusOutEvent(event)
-
+        ColorWordLineEdit.focusOutEvent(self, event)
 
     def insertFromMimeData (self, source ):
         text = source.text()
